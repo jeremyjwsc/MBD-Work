@@ -1,7 +1,18 @@
+---
+title: "Prostate Cancer Data in R"
+author: "Jeremy Williams"
+date: "22 de febrero de 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+
 # prostate data
-install.packages("sda")
+#install.packages("sda")
 # load sda library
-library("sda")
+suppressMessages(suppressWarnings(library("sda")))
 
 # load Singh et al (2001) data set
 data(singh2002)
@@ -40,3 +51,4 @@ sum(p.adjust(sort(p.val), method="holm",N)<0.05)
 sum(p.adjust(sort(p.val), method="bonferroni",N)<0.05)
 
 
+```
