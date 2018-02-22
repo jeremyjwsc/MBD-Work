@@ -2,17 +2,17 @@
 Mathematics and Big Data aimed at learn and apply various mathematical and statistical methods related to the
 discovery of relevant patterns in data sets.
 
-* Introduction: Statistical learning, concept, methods, and basic examples: knn and regression.
+* Introduction: Statistical Learning, Concept, Methods, and Basic Examples: KNN and Regression.
 
-* Linear methods (logistic regression, linear discriminant analysis, lasso).
+* Linear Methods (Logistic Regression, Linear Discriminant Analysis, Lasso etc.).
 
-* Non-linear methods.
+* Non-Linear Methods.
 
-* Tree-based methods (regression and clssification trees, bagging, boosting and random forests).
+* Tree-Based Methods (Regression and Classification Trees, Bagging, Boosting and Random Forests).
 
-* Support vector Machines
+* Support Vector Machines
 
-* Unsupervised learning: PCA and KNN
+* Unsupervised Learning: PCA and KNN
 
-* Topological data analysis.
+* Topological Data Analysis.
 
