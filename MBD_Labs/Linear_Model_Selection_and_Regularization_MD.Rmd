@@ -1,10 +1,10 @@
 ---
 title: "Linear Model Selection and Regularization in R"
 author: "Jeremy Williams"
-date: "April 4th 2018"
+date: "April 1, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r, load_packages, error=TRUE}
