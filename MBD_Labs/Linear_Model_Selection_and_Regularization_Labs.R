@@ -8,9 +8,15 @@
 #install.packages("leaps");install.packages("car");
 #install.packages("glmnet"); install.packages("plotmo")
 #install.packages("ISLR");install.packages("pls")
+#install.packages("haven");install.packages("Hmisc")
 
+suppressMessages(suppressWarnings(library(haven)))
+suppressMessages(suppressWarnings(library(Hmisc)))
 suppressMessages(suppressWarnings(library(ISLR)))
+
 #fix(Hitters)
+#View(Hitters)
+
 names(Hitters)
 dim(Hitters)
 sum(is.na(Hitters$Salary))

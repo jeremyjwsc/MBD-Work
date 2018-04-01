@@ -3,8 +3,8 @@ title: "Linear Model Selection and Regularization in R"
 author: "Jeremy Williams"
 date: "April 1, 2018"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r, load_packages, error=TRUE}
@@ -17,9 +17,15 @@ output:
 #install.packages("leaps");install.packages("car");
 #install.packages("glmnet"); install.packages("plotmo")
 #install.packages("ISLR");install.packages("pls")
+#install.packages("haven");install.packages("Hmisc")
 
+suppressMessages(suppressWarnings(library(haven)))
+suppressMessages(suppressWarnings(library(Hmisc)))
 suppressMessages(suppressWarnings(library(ISLR)))
+
 #fix(Hitters)
+#View(Hitters)
+
 names(Hitters)
 dim(Hitters)
 sum(is.na(Hitters$Salary))
