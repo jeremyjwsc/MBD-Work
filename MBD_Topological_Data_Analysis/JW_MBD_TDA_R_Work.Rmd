@@ -1,25 +1,98 @@
+---
+title: "Topological Data Analysis in R"
+author: "Jeremy Williams"
+date: "May 1, 2018"
+output:
+  pdf_document:
+    fig_height: 4
+    fig_width: 6
+    toc: yes
+    toc_depth: 2
+  html_document:
+    fig_height: 4
+    fig_width: 6
+    toc: yes
+    toc_depth: 2
+subtitle: Mathematics for Big Data  
+---
 
+\newpage
+
+# Topological Data Analysis (Practical Work)
+
+Practical 1
+========================================================
+  
+```{r TDA1}
+
+## Install code ##
+#install.packages("FactoMineR", dependencies=TRUE)
+#install.packages("locfit", dependencies=TRUE)
+#install.packages("ks",dependencies=TRUE)
+#install.packages(c('openssl', 'xml2', 'httr','git2r', 'curl', 'hunspell', lintr', 'rversions', 'covr', gmailr','devtools','FNN'),dependencies=TRUE)
+#install.packages("rgl",dependencies=TRUE)
+#install.packages("doParallel",dependencies=TRUE)
+#install.packages("TDA",dependencies=TRUE)
+#install.packages("TDAmapper",dependencies=TRUE)
+#install.packages("networkD3",dependencies=TRUE)
+## End of Install code ##
+
+## Library code
+suppressMessages(suppressWarnings(library("FNN")))
+suppressMessages(suppressWarnings(library("TDA")))
+## End Library code
+  
 ## R code ##
-#install.packages('TDA',repos = 'http://cran.r-project.org') ## This also installs igraph
-#install.packages('TDAmapper',repos = 'http://cran.r-project.org')
-#install.packages('rgl',repos = 'http://cran.r-project.org') ## for plot3d function
-#install.packages('doParallel',repos = 'http://cran.r-project.org') 
+circleSample <- circleUnif(n = 400, r = 1)
+plot(circleSample)
+
+suppressMessages(suppressWarnings(library(rgl)))
+torusSample <- torusUnif(n = 10000, a = 1.8, c = 5)
+plot3d(torusSample)
+
+suppressMessages(suppressWarnings(library(igraph)))
+g1 <- graph( edges=c(1,2, 2,3, 3, 1), n=10 )
+plot(g1)
+
+suppressMessages(suppressWarnings(library(TDAmapper)))
+m1 <- mapper1D(
+  distance_matrix = dist(data.frame( x=2*cos(0.5*(1:100)), 
+  y=sin(1:100) )), 
+  filter_values = 2*cos(0.5*(1:100)),
+  num_intervals = 10,
+  percent_overlap = 50,
+  num_bins_when_clustering = 10)
+
+suppressMessages(suppressWarnings(library(igraph)))
+g1 <- graph.adjacency(m1$adjacency, mode="undirected")
+plot(g1, layout = layout.auto(g1) )
 ## End of R code ##
 
-# Example in TDA
+```
+
+\newpage
+
+Practical 2
+========================================================
+  
+
+```{r TDA2}
+
+## Install code ##
+#install.packages("FactoMineR", dependencies=TRUE)
+#install.packages("locfit", dependencies=TRUE)
+#install.packages("ks",dependencies=TRUE)
+#install.packages(c('openssl', 'xml2', 'httr','git2r', 'curl', 'hunspell', lintr', 'rversions', 'covr', gmailr','devtools','FNN'),dependencies=TRUE)
+#install.packages("rgl",dependencies=TRUE)
+#install.packages("doParallel",dependencies=TRUE)
+#install.packages("TDA",dependencies=TRUE)
+#install.packages("TDAmapper",dependencies=TRUE)
+#install.packages("networkD3",dependencies=TRUE)
+## End of Install code ##
+
 ## Library code
-suppressMessages(suppressWarnings(library(TDA)))
-suppressMessages(suppressWarnings(library(TDAmapper)))
-suppressMessages(suppressWarnings(library(igraph)))
-suppressMessages(suppressWarnings(library(ggplot2)))
-suppressMessages(suppressWarnings(library(rgl)))
-suppressMessages(suppressWarnings(library(FactoMineR)))
-suppressMessages(suppressWarnings(library(locfit)))
-suppressMessages(suppressWarnings(library(ks)))
-suppressMessages(suppressWarnings(library(doParallel)))
-suppressMessages(suppressWarnings(library(caTools)))
-suppressMessages(suppressWarnings(library(boot)))
-suppressMessages(suppressWarnings(library(devtools)))
+suppressMessages(suppressWarnings(library("FNN")))
+suppressMessages(suppressWarnings(library("TDA")))
 ## End Library code
 
 X <- circleUnif(n=400,r=1)
@@ -72,7 +145,6 @@ persp(x=Xseq,y=Yseq,z=matrix(DTM,nrow=length(Xseq),ncol=length(Yseq)),
       expand=3, col="red",border=NA, ltheta=50,shade=0.5)
 
 # Use as filter function the KDE function on X
-suppressMessages(suppressWarnings(library("ks")))
 h <- 0.3  
 KDE <- kde(X = X, Grid = Grid, h = h)
 par(mfrow = c(1,2))
@@ -117,3 +189,5 @@ DiagVR <- ripsDiag(X=Xnoise,
                    maxdimension = 1, maxscale = 5, dist = 'euclidean',
                    library="GUDHI",printProgress = FALSE)
 plot(x = DiagVR[["diagram"]],main="Vietoris-Rips Diagram")
+
+```
