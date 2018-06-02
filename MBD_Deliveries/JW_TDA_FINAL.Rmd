@@ -1,0 +1,379 @@
+---
+title: "Topological Data Analysis in R"
+author: "Jeremy Williams"
+date: "June 4th, 2018"
+output:
+  pdf_document:
+    fig_height: 4
+    fig_width: 6
+    toc: yes
+    toc_depth: 2
+  html_document:
+    fig_height: 4
+    fig_width: 6
+    toc: yes
+    toc_depth: 2
+subtitle: Mathematics for Big Data (R Coding Assignment)
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\newpage
+
+Software Environment Set Up
+========================================================
+Before installing R package TDA, Four packages are needed to installed:</br> 
+***parallel**</br>
+***FNN**</br>
+***igraph**</br>
+***scales**</br>
+
+## Installing Packages (*parallel*, *FNN*, *igraph* and *scales*)
+```{r, message=FALSE, warning=FALSE}
+if(!require(package = "parallel")){
+  install.packages(pkgs = "parallel")
+}
+if(!require(package = "FNN")){
+  install.packages(pkgs = "FNN")
+}
+if(!require(package = "igraph")){
+  install.packages(pkgs = "igraph")
+}
+if(!require(package = "scales")){
+  install.packages(pkgs = "scales")
+}
+```
+
+## Installing *TDA* Package
+```{r, message=FALSE, warning=FALSE}
+if(!require(package = "TDA")){
+  install.packages(pkgs = "TDA")
+}
+```
+
+## Other Packages (*rgl*, *gdata*, *readxl*, *formattable*, *ggplots* and *gplots*)
+```{r,message=FALSE, warning=FALSE}
+if(!require(package = "rgl")){
+  install.packages(pkgs = "rgl")
+}
+if(!require(package = "gdata")){
+  install.packages(pkgs = "gdata")
+}
+if(!require(package = "readxl")){
+  install.packages(pkgs = "readxl")
+}
+if(!require(package = "formattable")){
+  install.packages(pkgs = "formattable")
+}
+if(!require(package = "ggplot2")){
+  install.packages(pkgs = "ggplot2")
+}
+if(!require(package = "gplots")){
+  install.packages(pkgs = "gplots")
+}
+```
+
+## Loading Packages
+```{r}
+suppressMessages(suppressWarnings(library(scales)))
+suppressMessages(suppressWarnings(library(FNN)))
+suppressMessages(suppressWarnings(library(igraph)))
+suppressMessages(suppressWarnings(library(TDA)))
+suppressMessages(suppressWarnings(library(rgl)))
+suppressMessages(suppressWarnings(library(gdata)))
+suppressMessages(suppressWarnings(library(readxl)))
+suppressMessages(suppressWarnings(library(formattable)))
+suppressMessages(suppressWarnings(library(ggplot2)))
+suppressMessages(suppressWarnings(library(gplots)))
+```
+
+## Data Source Location
+Dataset can be downloaded here [link](http://archive.ics.uci.edu/ml/datasets/Breast+Tissue)
+
+## Importing the dataset (required package is *readxl*)
+```{r,message=FALSE, warning=FALSE}
+data = read_excel("BreastData.xls")
+attach(data)
+```
+
+\newpage
+
+Basic Functions from TDA for data generation.
+========================================================
+## Circle
+```{r}
+names(data)
+circle = circleUnif(n = 100, r = 2)       # r is the radius
+plot(circle)
+```
+
+## Sphere        (required package is *rgl*)
+```{r}
+sphere = sphereUnif(n = 1000, d = 2, r = 2)       # r is the radius, d is dimension of real space minus 1. 
+plot3d(sphere)
+plot(sphere)
+```
+
+## Torus       (required package is *rgl*)
+```{r}
+torus = torusUnif(n = 10000, a= 1.5, c = 3)
+plot3d(torus)
+plot(torus)
+```
+
+\newpage
+
+DA & DR Tables with Model and Diagnostic Plots 
+========================================================
+
+```{r}
+DA <- data$DA
+DR <- data$DR
+datap <- data.frame(DA, DR)
+summary(datap)
+```
+
+
+# Model (DA ~ DR) 
+```{r}
+plot(data$DA, data$DR, 
+     xlab="Impedance distance between spectral ends", 
+     ylab="Distance between I0 and maximum frequency point",
+     main="Normal (DA ~ DR)")
+lines(lowess(data$DA,data$DR), col="blue") # lowess line (x,y)
+grid()
+
+plotLowess(data$DA ~ data$DR, data=data, 
+           xlab="Distance between I0 and maximum frequency point",
+           ylab="Impedance distance between spectral ends", 
+           main="Lowess (DR ~ DA)")
+```
+
+\newpage
+
+Area, DA & DR Tables with Model and Diagnostic Plots
+========================================================
+
+```{r,message=FALSE, warning=FALSE}
+Area <-data$Area
+DA <- data$DA
+DR <- data$DR
+
+datapm <- data.frame(Area, DA, DR)
+summary(datapm)
+```
+
+# Prediction of Model (Area ~ DA + DR) 
+```{r}
+# Fit a linear model and run a summary of its results.
+
+Area <-data$Area 
+DA <-data$DA
+DR <-data$DR
+
+mod1<-lm(Area ~ DA + DR, data = data)
+summary(mod1)
+
+# Predicted values 
+Predict_data <- fitted(mod1)
+plot(Predict_data, main="Predicted Values")
+#lines(Predict_data, col="dark green")
+grid()
+
+# Model coefficients
+coefficients(mod1)
+
+# CIs for model parameters
+confint(mod1, level=0.95)
+
+# Plot model residuals
+plot(mod1, pch=16, which=1)
+grid()
+
+# Extract coefficients
+mod1_coef <- round(coef(mod1), 3) 
+
+# Display equation 
+mtext(bquote(Area == .(mod1_coef[3])* DR +.(mod1_coef[2])* DA + .(mod1_coef[1])),
+      adj=1, padj=-2) 
+```
+
+
+\newpage
+
+Distance Functions and Density Estimators
+========================================================
+```{r}
+X = data.frame(DA, DR)
+Xlim = c(-10000, 10000)
+Ylim = c(-10000, 10000)
+by = 27
+Xseq = seq(from = Xlim[1], to = Xlim[2], by = by)
+Yseq = seq(from = Ylim[1], to = Ylim[2], by = by)
+Grid = expand.grid(Xseq, Yseq)        #Generating the grid.
+distance = distFct(X = X, Grid = Grid)
+par(mfrow = c(1,2))
+plot(X, xlab = "DA", ylab = "DR", main = "DA vs DR")
+persp(x = Xseq, y = Yseq,
+z = matrix(distance, nrow = length(Xseq), ncol = length(Yseq)),
+xlab = "", ylab = "", zlab = "", theta = -30, phi = 35, scale = FALSE,
+expand = 1.2, col = "red", border = NA, ltheta = 30, shade = 0.5,
+main = "Distance Function")
+```
+
+\newpage
+
+Distance to Measure (DTM)
+========================================================
+```{r}
+smoothing_parameter <- 0.2
+DTM <- dtm(X = X, Grid = Grid, m0 = smoothing_parameter)
+par(mfrow = c(1,2))
+plot(X, xlab = "", ylab = "", main = "Sample X")
+persp(x = Xseq, y = Yseq,
+z = matrix(DTM, nrow = length(Xseq), ncol = length(Yseq)),
+xlab = "", ylab = "", zlab = "", theta = -30, phi = 35, scale = FALSE,
+expand = 1.2, col = "red", border = NA, ltheta = 30, shade = 0.5,
+main = "DTM")
+```
+
+\newpage
+
+KNN Density Estimator
+========================================================
+```{r}
+k <- 60
+kNN <- knnDE(X = X, Grid = Grid, k = k)
+par(mfrow = c(1,2))
+plot(X, xlab = "DA", ylab = "DR", main = "Sample X")
+persp(x = Xseq, y = Yseq,
+z = matrix(kNN, nrow = length(Xseq), ncol = length(Yseq)),
+xlab = "", ylab = "", zlab = "", theta = -35, phi = 35, scale = FALSE,
+expand = 1.2, col = "red", border = NA, ltheta = 30, shade = 0.5,
+main = "kNN")
+```
+
+\newpage
+
+Gaussian Kernel Density Estimator (KDE)
+========================================================
+```{r}
+h <- 0.1
+KDE <- kde(X = X, Grid = Grid, h = h)
+par(mfrow = c(1,2))
+plot(X, xlab = "", ylab = "", main = "Sample X")
+persp(x = Xseq, y = Yseq,
+z = matrix(kNN, nrow = length(Xseq), ncol = length(Yseq)),
+xlab = "", ylab = "", zlab = "", theta = -20, phi = 35, scale = FALSE,
+expand = 1.2, col = "red", border = NA, ltheta = 50, shade = 0.5,
+main = "KDE")
+```
+
+\newpage
+
+Kernel Distance
+========================================================
+```{r}
+h <- 0.3
+Kdist <- kernelDist(X = X, Grid = Grid, h = h)
+par(mfrow = c(1,2))
+plot(X, xlab = "", ylab = "", main = "Sample X")
+persp(x = Xseq, y = Yseq,
+z = matrix(Kdist, nrow = length(Xseq), ncol = length(Yseq)),
+xlab = "", ylab = "", zlab = "", theta = -20, phi = 35, scale = FALSE,
+expand = 1.2, col = "red", border = NA, ltheta = 50, shade = 0.5,
+main = "Kernel Distance")
+```
+
+\newpage
+
+Bootstrap Confidence Bands and Persistent Homology 
+========================================================
+```{r}
+band <- bootstrapBand(X = X, FUN = kde, Grid = Grid, B = 100,
+parallel = FALSE, alpha = 0.1, h = h)
+print(band[["width"]])
+Diag <- gridDiag(X = X, FUN = kde, lim = cbind(Xlim, Ylim), by = by,
+sublevel = FALSE, library = "Dionysus", printProgress = FALSE, h = 0.3)
+par(mfrow = c(1,3))
+plot(X, main = "Sample X")
+persp(x = Xseq, y = Yseq,
+z = matrix(KDE, nrow = length(Xseq), ncol = length(Yseq)),
+xlab = "", ylab = "", zlab = "", theta = -20, phi = 35, scale = FALSE,
+expand = 3, col = "red", border = NA, ltheta = 50, shade = 0.9,
+main = "KDE")
+plot(x = Diag[["diagram"]], band = 2 * band[["width"]], main = "KDE Diagram")
+```
+
+\newpage
+
+Rips Diagram 
+========================================================
+```{r}
+X1 = X
+X2 = X + sd(X$DA) + sd(X$DR)
+print(X2)
+X_final = rbind(X1, X2)
+print(X_final)
+par(mfrow = c(1,1))
+plot(X_final, xlab = "", ylab = "")
+```
+```{r}
+Diag <- ripsDiag(X = X_final, maxdimension = 1, maxscale = 5,
+library = "GUDHI", printProgress = FALSE)
+par(mfrow=c(1,2))
+plot(X_final, xlab="", ylab="")
+plot(Diag[["diagram"]])
+```
+```{r}
+Diag1 <- ripsDiag(X = X1, maxdimension = 1, maxscale = 5)
+Diag2 <- ripsDiag(X = X2, maxdimension = 1, maxscale = 5)
+print(bottleneck(Diag1 = Diag1[["diagram"]], Diag2 = Diag2[["diagram"]],
+dimension = 1))
+
+```
+```{r}
+print(wasserstein(Diag1 = Diag1[["diagram"]], Diag2 = Diag2[["diagram"]],
+p = 2, dimension = 1))
+```
+
+
+\newpage
+
+Density Clustering 
+========================================================
+
+```{r}
+Y = data.frame(DA, DR)
+Tree <- clusterTree(Y, k =6,density = "knn", printProgress = FALSE)
+plot(Tree, type = "lambda", main = "lambda Tree (kNN)")
+plot(Tree, type = "kappa", main = "kappa Tree (kNN)")
+```
+```{r}
+TreeKDE = clusterTree(Y, k = 4, h = 0.3, density = "kde", printProgress = FALSE)
+plot(TreeKDE, type = "lambda", main = "lambda TreeKDE (kNN)")
+plot(TreeKDE, type = "kappa", main = "kappa TreeKDE (kNN)")
+```
+
+\newpage
+
+Reference 
+========================================================
+
+**Dua, D. and Karra Taniskidou, E.** (2017). UCI Machine Learning Repository [http://archive.ics.uci.edu/ml]. Irvine, CA: University of California, School of Information and Computer Science. 
+
+
+**Jossinet J** (1996) Variability of impedivity in normal and pathological breast tissue. Med. & Biol. Eng. & Comput, 34: 346-350.
+
+**Silva JE, Marques de Sá JP, Jossinet J** (2000) Classification of Breast Tissue by Electrical Impedance Spectroscopy. Med & Bio Eng & Computing, 38:26-30.
+
+
+**Czes Kosniowski**, A first course in algebraic topology. Cambridge University Press (1980).
+
+**James R. Munkres**, Topology, Pentice Hall (2000).
+
+**Allen Hatcher**, Algebraic Topology, (2001) https://www.math.cornell.edu/~hatcher/AT/AT.pdf
+
+**Herbert Edelsbrunner**, A Short Course in Computational Geometry and Topology, Springer (2014)
