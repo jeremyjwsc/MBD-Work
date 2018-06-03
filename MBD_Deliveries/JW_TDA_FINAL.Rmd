@@ -118,7 +118,7 @@ The Dataset has electrical impedance measurements of freshly excised breast tiss
 The Dataset is a multivariate dataset having 10 attributes (9 numeric types, 1 class type) and 106 instances.
 	
 * Dataset Attribute Information:
-	  + **Class**: Different types of breast cancer observed/studied. 
+    + **Class**: Different types of breast cancer observed/studied 
     + **I0**: Impedivity at zero frequency
     + **PA500**: Phase angle at 500KHz
     + **HFS**: High frequency slope of phase angle
