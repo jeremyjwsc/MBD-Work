@@ -29,7 +29,7 @@ TDA stands for Topological Data Analysis. In particular, it provides functions f
 
 One of the tools from algebraic topology used for TDA is called as Persistent homology. This tool allows us to detect large or small features in the data in the form of holes.
 
-TDA packages requires the following 4 packages as a prerequisite:
+TDA package requires the following 4 packages as a prerequisite:
 
  1. **Parallel**: This package handles running much larger chunks of computations in parallel. 
  2. **FNN**: Fast Nearest Neighbour Search Algorithms and Applications.
@@ -40,7 +40,7 @@ TDA packages requires the following 4 packages as a prerequisite:
 
 R Environment Set Up
 ========================================================
-Before installing **TDA** package, **parallel**, **FNN**, **igraph** and **scales** needs to be installed. 
+Before installing **TDA** package, **parallel**, **FNN**, **igraph** and **scales** need to be installed. 
 
 ## Installing Packages (*parallel*, *FNN*, *igraph* and *scales*)
 ```{r}
@@ -65,7 +65,7 @@ if(!require(package = "TDA")){
 }
 ```
 
-## Other Packages (*rgl*, *gdata*, *readxl*, *formattable*, *ggplots* and *gplots*)
+## Other Packages (*rgl*, *gdata*, *readxl*, *formattable*, *ggplots*, *gplots*, *psych* and *pander*)
 ```{r}
 if(!require(package = "rgl")){
   install.packages(pkgs = "rgl")
@@ -88,6 +88,9 @@ if(!require(package = "gplots")){
 if(!require(package = "psych")){
   install.packages(pkgs = "psych")
 }
+if(!require(package = "pander")){
+  install.packages(pkgs = "pander")
+}
 ```
 
 ## Loading Packages
@@ -103,6 +106,7 @@ library(formattable)
 library(ggplot2)
 library(gplots)
 library(psych)
+library(pander)
 ```
 
 \newpage
@@ -137,11 +141,17 @@ In this Report, the Dataset will be used to analyze two (2) attributes, **DA** a
 
 Details for TDA version 1.6.2 can be viewed here [link](https://www.rdocumentation.org/packages/TDA/versions/1.6.2).
 
-## Describe the Dataset (required packages are *readxl* and *psych*)
-```{r}
+## Describe and Plot the Dataset (required packages are *readxl*, *psych* and *pander*)
+```{r,fig.align = "center"}
 data = read_excel("BreastData.xls")
 attach(data)
-describe(data)
+ddata <-describe(data)
+
+panderOptions("table.split.table", Inf)  ## don't split tables
+pander(ddata)
+
+Bdata<-cbind(data[,3],data[,4],data[,5],data[,6],data[,7],data[,8],data[,9])
+plot(Bdata,main = "Breast Tissue Data", pch = 21, bg = rainbow(7))
 ```
 
 \newpage
@@ -149,24 +159,26 @@ describe(data)
 Basic Functions from TDA for data generation.
 ========================================================
 ## Circle
-```{r}
-names(data)
+```{r,fig.align = "center"}
 circle = circleUnif(n = 100, r = 2)       # r is the radius
-plot(circle)
+plot3d(circle,col = rainbow(7))
+plot(circle, pch = 21, bg = rainbow(7))
 ```
 
 ## Sphere        (required package is *rgl*)
-```{r}
-sphere = sphereUnif(n = 1000, d = 2, r = 2)       # r is the radius, d is dimension of real space minus 1. 
-plot3d(sphere)
-plot(sphere)
+```{r,fig.align = "center"}
+ 
+sphere = sphereUnif(n = 1000, d = 2, r = 2) # r is the radius, 
+                                            # d is dimension of real space minus 1.
+plot3d(sphere, col = rainbow(7))
+plot(sphere,pch = 21, bg = rainbow(7))
 ```
 
 ## Torus       (required package is *rgl*)
-```{r}
+```{r,fig.align = "center"}
 torus = torusUnif(n = 10000, a= 1.5, c = 3)
-plot3d(torus)
-plot(torus)
+plot3d(torus,col = rainbow(7))
+plot(torus,pch = 21, bg = rainbow(7))
 ```
 
 \newpage
@@ -178,7 +190,10 @@ DA & DR Tables with Model and Diagnostic Plots
 DA <- data$DA
 DR <- data$DR
 datap <- data.frame(DA, DR)
-summary(datap)
+
+
+panderOptions("table.split.table", Inf)  ## don't split tables
+pander(summary(datap))
 ```
 
 
@@ -187,14 +202,14 @@ summary(datap)
 plot(data$DA, data$DR, 
      xlab="Impedance distance between spectral ends", 
      ylab="Distance between I0 and maximum frequency point",
-     main="Normal (DA ~ DR)")
+     main="Normal (DA ~ DR)",pch = 21, bg = rainbow(2))
 lines(lowess(data$DA,data$DR), col="blue") # lowess line (x,y)
 grid()
 
 plotLowess(data$DA ~ data$DR, data=data, 
            xlab="Distance between I0 and maximum frequency point",
            ylab="Impedance distance between spectral ends", 
-           main="Lowess (DR ~ DA)")
+           main="Lowess (DR ~ DA)",pch = 21, bg = rainbow(2))
 ```
 
 \newpage
@@ -208,7 +223,10 @@ DA <- data$DA
 DR <- data$DR
 
 datapm <- data.frame(Area, DA, DR)
-summary(datapm)
+
+panderOptions("table.split.table", Inf)  ## don't split tables
+pander(summary(datapm))
+
 ```
 
 # Prediction of Model (Area ~ DA + DR) 
@@ -220,22 +238,27 @@ DA <-data$DA
 DR <-data$DR
 
 mod1<-lm(Area ~ DA + DR, data = data)
-summary(mod1)
+
+panderOptions("table.split.table", Inf)  ## don't split tables
+pander(summary(mod1))
 
 # Predicted values 
 Predict_data <- fitted(mod1)
-plot(Predict_data, main="Predicted Values")
-#lines(Predict_data, col="dark green")
+plot(Predict_data, main="Predicted Values",pch = 21, bg = rainbow(2))
 grid()
 
 # Model coefficients
-coefficients(mod1)
+panderOptions("table.split.table", Inf)  ## don't split tables
+pander(coefficients(mod1))
+
 
 # CIs for model parameters
-confint(mod1, level=0.95)
+panderOptions("table.split.table", Inf)  ## don't split tables
+pander(confint(mod1, level=0.95))
+
 
 # Plot model residuals
-plot(mod1, pch=16, which=1)
+plot(mod1, pch=21, which=1, bg = rainbow(2))
 grid()
 
 # Extract coefficients
@@ -246,12 +269,11 @@ mtext(bquote(Area == .(mod1_coef[3])* DR +.(mod1_coef[2])* DA + .(mod1_coef[1]))
       adj=1, padj=-2) 
 ```
 
-
 \newpage
 
 Distance Functions and Density Estimators
 ========================================================
-```{r}
+```{r,fig.align = "center"}
 X = data.frame(DA, DR)
 Xlim = c(-10000, 10000)
 Ylim = c(-10000, 10000)
@@ -260,8 +282,10 @@ Xseq = seq(from = Xlim[1], to = Xlim[2], by = by)
 Yseq = seq(from = Ylim[1], to = Ylim[2], by = by)
 Grid = expand.grid(Xseq, Yseq)        #Generating the grid.
 distance = distFct(X = X, Grid = Grid)
+
 par(mfrow = c(1,2))
-plot(X, xlab = "DA", ylab = "DR", main = "DA vs DR")
+plot(X, xlab = "DA", ylab = "DR", main = "DA vs DR",pch = 21, bg = rainbow(2))
+
 persp(x = Xseq, y = Yseq,
 z = matrix(distance, nrow = length(Xseq), ncol = length(Yseq)),
 xlab = "", ylab = "", zlab = "", theta = -30, phi = 35, scale = FALSE,
@@ -273,11 +297,13 @@ main = "Distance Function")
 
 Distance to Measure (DTM)
 ========================================================
-```{r}
+```{r,fig.align = "center"}
 smoothing_parameter <- 0.2
 DTM <- dtm(X = X, Grid = Grid, m0 = smoothing_parameter)
+
 par(mfrow = c(1,2))
-plot(X, xlab = "", ylab = "", main = "Sample X")
+plot(X, xlab = "", ylab = "", main = "Sample X",pch = 21, bg = rainbow(2))
+
 persp(x = Xseq, y = Yseq,
 z = matrix(DTM, nrow = length(Xseq), ncol = length(Yseq)),
 xlab = "", ylab = "", zlab = "", theta = -30, phi = 35, scale = FALSE,
@@ -289,11 +315,13 @@ main = "DTM")
 
 KNN Density Estimator
 ========================================================
-```{r}
+```{r,fig.align = "center"}
 k <- 60
 kNN <- knnDE(X = X, Grid = Grid, k = k)
+
 par(mfrow = c(1,2))
-plot(X, xlab = "DA", ylab = "DR", main = "Sample X")
+plot(X, xlab = "DA", ylab = "DR", main = "Sample X",pch = 21, bg = rainbow(2))
+
 persp(x = Xseq, y = Yseq,
 z = matrix(kNN, nrow = length(Xseq), ncol = length(Yseq)),
 xlab = "", ylab = "", zlab = "", theta = -35, phi = 35, scale = FALSE,
@@ -305,11 +333,13 @@ main = "kNN")
 
 Gaussian Kernel Density Estimator (KDE)
 ========================================================
-```{r}
+```{r,fig.align = "center"}
 h <- 0.1
 KDE <- kde(X = X, Grid = Grid, h = h)
+
 par(mfrow = c(1,2))
-plot(X, xlab = "", ylab = "", main = "Sample X")
+plot(X, xlab = "", ylab = "", main = "Sample X",pch = 21, bg = rainbow(2))
+
 persp(x = Xseq, y = Yseq,
 z = matrix(kNN, nrow = length(Xseq), ncol = length(Yseq)),
 xlab = "", ylab = "", zlab = "", theta = -20, phi = 35, scale = FALSE,
@@ -321,11 +351,13 @@ main = "KDE")
 
 Kernel Distance
 ========================================================
-```{r}
+```{r,fig.align = "center"}
 h <- 0.3
 Kdist <- kernelDist(X = X, Grid = Grid, h = h)
+
 par(mfrow = c(1,2))
-plot(X, xlab = "", ylab = "", main = "Sample X")
+plot(X, xlab = "", ylab = "", main = "Sample X",pch = 21, bg = rainbow(2))
+
 persp(x = Xseq, y = Yseq,
 z = matrix(Kdist, nrow = length(Xseq), ncol = length(Yseq)),
 xlab = "", ylab = "", zlab = "", theta = -20, phi = 35, scale = FALSE,
@@ -337,19 +369,24 @@ main = "Kernel Distance")
 
 Bootstrap Confidence Bands and Persistent Homology 
 ========================================================
-```{r}
+```{r,fig.align = "center"}
 band <- bootstrapBand(X = X, FUN = kde, Grid = Grid, B = 100,
 parallel = FALSE, alpha = 0.1, h = h)
-print(band[["width"]])
+
+pander(band[["width"]])
+```
+```{r,fig.align = "center"}
 Diag <- gridDiag(X = X, FUN = kde, lim = cbind(Xlim, Ylim), by = by,
 sublevel = FALSE, library = "Dionysus", printProgress = FALSE, h = 0.3)
 par(mfrow = c(1,3))
-plot(X, main = "Sample X")
+plot(X, main = "Sample X",pch = 21, bg = rainbow(2))
+
 persp(x = Xseq, y = Yseq,
 z = matrix(KDE, nrow = length(Xseq), ncol = length(Yseq)),
 xlab = "", ylab = "", zlab = "", theta = -20, phi = 35, scale = FALSE,
 expand = 3, col = "red", border = NA, ltheta = 50, shade = 0.9,
 main = "KDE")
+
 plot(x = Diag[["diagram"]], band = 2 * band[["width"]], main = "KDE Diagram")
 ```
 
@@ -357,31 +394,37 @@ plot(x = Diag[["diagram"]], band = 2 * band[["width"]], main = "KDE Diagram")
 
 Rips Diagram 
 ========================================================
-```{r}
+```{r,fig.align = "center"}
 X1 = X
 X2 = X + sd(X$DA) + sd(X$DR)
-print(X2)
+
+pander(X2)
+
 X_final = rbind(X1, X2)
-print(X_final)
+
+pander(X_final)
+
 par(mfrow = c(1,1))
-plot(X_final, xlab = "", ylab = "")
+plot(X_final, xlab = "", ylab = "",pch = 21, bg = rainbow(2))
 ```
 ```{r}
 Diag <- ripsDiag(X = X_final, maxdimension = 1, maxscale = 5,
 library = "GUDHI", printProgress = FALSE)
+
 par(mfrow=c(1,2))
-plot(X_final, xlab="", ylab="")
+plot(X_final, xlab="", ylab="",pch = 21, bg = rainbow(2))
 plot(Diag[["diagram"]])
 ```
 ```{r}
 Diag1 <- ripsDiag(X = X1, maxdimension = 1, maxscale = 5)
 Diag2 <- ripsDiag(X = X2, maxdimension = 1, maxscale = 5)
-print(bottleneck(Diag1 = Diag1[["diagram"]], Diag2 = Diag2[["diagram"]],
+
+pander(bottleneck(Diag1 = Diag1[["diagram"]], Diag2 = Diag2[["diagram"]],
 dimension = 1))
 
 ```
 ```{r}
-print(wasserstein(Diag1 = Diag1[["diagram"]], Diag2 = Diag2[["diagram"]],
+pander(wasserstein(Diag1 = Diag1[["diagram"]], Diag2 = Diag2[["diagram"]],
 p = 2, dimension = 1))
 ```
 
@@ -391,7 +434,7 @@ p = 2, dimension = 1))
 Density Clustering 
 ========================================================
 
-```{r}
+```{r,fig.align = "center"}
 Y = data.frame(DA, DR)
 Tree <- clusterTree(Y, k =6,density = "knn", printProgress = FALSE)
 plot(Tree, type = "lambda", main = "lambda Tree (kNN)")
@@ -402,6 +445,7 @@ TreeKDE = clusterTree(Y, k = 4, h = 0.3, density = "kde", printProgress = FALSE)
 plot(TreeKDE, type = "lambda", main = "lambda TreeKDE (kNN)")
 plot(TreeKDE, type = "kappa", main = "kappa TreeKDE (kNN)")
 ```
+
 
 \newpage
 
