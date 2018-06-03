@@ -13,25 +13,37 @@ output:
     fig_width: 6
     toc: yes
     toc_depth: 2
-subtitle: Mathematics for Big Data (R Coding Assignment)
+subtitle: Mathematics for Big Data (R Coding Report)
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
 \newpage
 
-Software Environment Set Up
+The *TDA* package in R Environment
 ========================================================
-Before installing R package TDA, Four packages are needed to installed:</br> 
-***parallel**</br>
-***FNN**</br>
-***igraph**</br>
-***scales**</br>
+
+TDA stands for Topological Data Analysis. In particular, it provides functions for the statistical analysis of persistent homology and for density clustering. It includes the implementations of functions that, given some data, provide topological information about underlying space such as the distance function, the distance to measure, the kNN density estimator (knn), the kernel density estimator (kde), the kernel distance function and the density clustering using knn and kde.
+
+One of the tools from algebraic topology used for TDA is called as Persistent homology. This tool allows us to detect large or small features in the data in the form of holes.
+
+TDA packages requires the following 4 packages as a prerequisite:
+
+ 1. **Parallel**: This package handles running much larger chunks of computations in parallel. 
+ 2. **FNN**: Fast Nearest Neighbour Search Algorithms and Applications.
+ 3. **igraph**: Provides functions for generating random and regular graphs, graph visualization etc.
+ 4. **scales**: Provides methods for automatically determining breaks and labels for axes and legends.
+ 
+\newpage
+
+R Environment Set Up
+========================================================
+Before installing **TDA** package, **parallel**, **FNN**, **igraph** and **scales** needs to be installed. 
 
 ## Installing Packages (*parallel*, *FNN*, *igraph* and *scales*)
-```{r, message=FALSE, warning=FALSE}
+```{r}
 if(!require(package = "parallel")){
   install.packages(pkgs = "parallel")
 }
@@ -47,14 +59,14 @@ if(!require(package = "scales")){
 ```
 
 ## Installing *TDA* Package
-```{r, message=FALSE, warning=FALSE}
+```{r}
 if(!require(package = "TDA")){
   install.packages(pkgs = "TDA")
 }
 ```
 
 ## Other Packages (*rgl*, *gdata*, *readxl*, *formattable*, *ggplots* and *gplots*)
-```{r,message=FALSE, warning=FALSE}
+```{r}
 if(!require(package = "rgl")){
   install.packages(pkgs = "rgl")
 }
@@ -73,29 +85,63 @@ if(!require(package = "ggplot2")){
 if(!require(package = "gplots")){
   install.packages(pkgs = "gplots")
 }
+if(!require(package = "psych")){
+  install.packages(pkgs = "psych")
+}
 ```
 
 ## Loading Packages
 ```{r}
-suppressMessages(suppressWarnings(library(scales)))
-suppressMessages(suppressWarnings(library(FNN)))
-suppressMessages(suppressWarnings(library(igraph)))
-suppressMessages(suppressWarnings(library(TDA)))
-suppressMessages(suppressWarnings(library(rgl)))
-suppressMessages(suppressWarnings(library(gdata)))
-suppressMessages(suppressWarnings(library(readxl)))
-suppressMessages(suppressWarnings(library(formattable)))
-suppressMessages(suppressWarnings(library(ggplot2)))
-suppressMessages(suppressWarnings(library(gplots)))
+library(scales)
+library(FNN)
+library(igraph)
+library(TDA)
+library(rgl)
+library(gdata)
+library(readxl)
+library(formattable)
+library(ggplot2)
+library(gplots)
+library(psych)
 ```
 
-## Data Source Location
-Dataset can be downloaded here [link](http://archive.ics.uci.edu/ml/datasets/Breast+Tissue)
+\newpage
 
-## Importing the dataset (required package is *readxl*)
-```{r,message=FALSE, warning=FALSE}
+Breast Tissue Data Set
+=======================================================
+The Breat Tissue Data Set is freely available on the UCI Machine Learning Repository Website.
+
+The Dataset can be downloaded here [link](http://archive.ics.uci.edu/ml/datasets/Breast+Tissue)
+
+The Dataset has electrical impedance measurements of freshly excised breast tissue.
+
+The Dataset is a multivariate dataset having 10 attributes (9 numeric types, 1 class type) and 106 instances.
+	
+* Dataset Attribute Information:
+	  + **Class**: Different types of breast cancer observed/studied. 
+    + **I0**: Impedivity at zero frequency
+    + **PA500**: Phase angle at 500KHz
+    + **HFS**: High frequency slope of phase angle
+    + **DA**: Impedance distance between spectral ends
+    + **Area**: Area under spectrum
+    + **A/DA**: Area normalized by DA
+    + **MAX IP**: Maximum of the spectrum
+    + **DR**: Distance between I0 and the real part of the maximum frequency point
+    + **P**: Length of the spectral curve
+
+## Dataset Purpose
+
+The Dataset can be used for predicting the classification of either the original 6 classes or of 4 classes by merging together the fibro-adenoma, mastopathy and glandular classes.
+
+In this Report, the Dataset will be used to analyze two (2) attributes, **DA** and **DR**, using **TDA version 1.6.2** in **R Envirnoment**. 
+
+Details for TDA version 1.6.2 can be viewed here [link](https://www.rdocumentation.org/packages/TDA/versions/1.6.2).
+
+## Describe the Dataset (required packages are *readxl* and *psych*)
+```{r}
 data = read_excel("BreastData.xls")
 attach(data)
+describe(data)
 ```
 
 \newpage
@@ -364,6 +410,7 @@ Reference
 
 **Dua, D. and Karra Taniskidou, E.** (2017). UCI Machine Learning Repository [http://archive.ics.uci.edu/ml]. Irvine, CA: University of California, School of Information and Computer Science. 
 
+**Brittany T. Fasy, Jisu Kim, Fabrizio Lecci, Clement Maria, Vincent Rouvreau**, Statistical Tools for Topological Data Analysis, The Comprehensive R Archive Network (2018). https://cran.r-project.org/web/packages/TDA/TDA.pdf 
 
 **Jossinet J** (1996) Variability of impedivity in normal and pathological breast tissue. Med. & Biol. Eng. & Comput, 34: 346-350.
 
