@@ -1,14 +1,14 @@
 ---
 title: "Topological Data Analysis in R"
 author: "Jeremy Williams"
-date: "June 1st, 2018"
+date: "June 4th, 2018"
 output:
-  pdf_document:
+  html_document:
     fig_height: 4
     fig_width: 6
     toc: yes
     toc_depth: 2
-  html_document:
+  pdf_document:
     fig_height: 4
     fig_width: 6
     toc: yes
@@ -17,7 +17,7 @@ subtitle: Mathematics for Big Data (R Coding Report)
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, fig.align = "center")
 ```
 
 \newpage
@@ -186,7 +186,7 @@ plot(torus,pch = 21, bg = rainbow(7))
 DA & DR Tables with Model and Diagnostic Plots 
 ========================================================
 
-```{r}
+```{r,fig.align = "center"}
 DA <- data$DA
 DR <- data$DR
 datap <- data.frame(DA, DR)
@@ -198,7 +198,7 @@ pander(summary(datap))
 
 
 # Model (DA ~ DR) 
-```{r}
+```{r,fig.align = "center"}
 plot(data$DA, data$DR, 
      xlab="Impedance distance between spectral ends", 
      ylab="Distance between I0 and maximum frequency point",
@@ -217,7 +217,7 @@ plotLowess(data$DA ~ data$DR, data=data,
 Area, DA & DR Tables with Model and Diagnostic Plots
 ========================================================
 
-```{r,message=FALSE, warning=FALSE}
+```{r,fig.align = "center"}
 Area <-data$Area
 DA <- data$DA
 DR <- data$DR
@@ -230,7 +230,7 @@ pander(summary(datapm))
 ```
 
 # Prediction of Model (Area ~ DA + DR) 
-```{r}
+```{r,fig.align = "center"}
 # Fit a linear model and run a summary of its results.
 
 Area <-data$Area 
@@ -449,6 +449,17 @@ plot(TreeKDE, type = "kappa", main = "kappa TreeKDE (kNN)")
 
 \newpage
 
+Conclusion 
+========================================================
+Biological phenomena are intrinsically highly variable and stochastic in nature, and notions of biological similarity are less rigid. Consequently, analysis methods for biomedical data need to identify shape characteristics that are fairly robust to changes by rescaling of distances and therefore become more qualitative in nature. This has led us to use methods adapted from the mathematics area of topology, which studies precisely the characteristics of shapes that are not rigid. 
+
+In this report, TDA in R Environment was performed on breast cancer data. We started with plotting the data and applying basic TDA functions on the data. The variables chosen for analysis is DA which is the impedance distance between spectral ends and DR which is distance between I0 and real part of the maximum frequency point. These measurements plotted in the (real, -imaginary) plane constitute the impedance spectrum from where the breast tissue features are computed. Our aim was to identify the different types of breast cancers based on the variability of impedivity in them. Distance function and density estimators were applied on the data and a linear relation between DA and DR could be seen. Similar graph was seen for the distance to measure graph. KNN density estimator, kernel and Gaussian density estimator showed a flat graph. Bootstrap confidence bands and persistent homology analysis showed a band width of 90%. The density clustering analysis was performed and kappa and lambda trees were plotted. 
+
+I believe that TDA, a group of methods for studying data from many different sources and of many different kinds, is particularly appropriate for the analysis of breast tissue data and can reveal interesting patterns. These methods begin the process of uncovering the topology or special organization of genomic data sets. TDA provides a viewpoint of these data which is combinatorial and therefore easy to grasp, and it has a degree of robustness to the sort of distortions that can occur in studying biomedical data.
+
+
+\newpage
+
 Reference 
 ========================================================
 
@@ -460,6 +471,9 @@ Reference
 
 **Silva JE, Marques de Sá JP, Jossinet J** (2000) Classification of Breast Tissue by Electrical Impedance Spectroscopy. Med & Bio Eng & Computing, 38:26-30.
 
+**Nicolau, M., Levine, A. J. & Carlsson, G.** Topology based data analysis identifies a subgroup of breast cancers with a unique mutational profile and excellent survival. Proc Natl Acad Sci U S A 108, 7265-70 (2011).
+
+**Madsen EVE, van Dalen J, van Gorp J, van Oort PMP, van Dalen T.** Frozen section analysis of sentinel lymph nodes in patients with breast cancer does not impair the probability to detect lymph node metastases. Virchows Arch. 2012;460:69-76. Published online 2011 Nov 25. doi: 10.1007/s00428-011-1171-1. PMCID:PMC3267028
 
 **Czes Kosniowski**, A first course in algebraic topology. Cambridge University Press (1980).
 
