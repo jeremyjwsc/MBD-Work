@@ -1,0 +1,325 @@
+---
+title: "Machine Learning (Decision Trees) in R"
+author: "Jeremy Williams"
+date: "June 8th, 2018"
+output:
+  pdf_document:
+    fig_height: 4
+    fig_width: 6
+    toc: yes
+    toc_depth: 2
+  html_document:
+    fig_height: 4
+    fig_width: 6
+    toc: yes
+    toc_depth: 2
+subtitle: Mathematics for Big Data (R Coding Report)
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, fig.align = "center")
+```
+
+\newpage
+
+Decision Trees
+========================================================
+
+  A decision tree is a decision support tool representing a set of choices in the graphical form of a tree. The different possible decisions are located at the ends of the branches (the "leaves" of the tree), and are reached according to decisions taken at each stage. The decision tree is a tool used in various fields such as security, data mining, medicine, etc.. It has the advantage of being legible and fast to execute. It is also a representation that can be automatically calculated by supervised learning algorithms.
+  
+  A major advantage of decision trees is that they can be calculated automatically from databases by supervised learning algorithms. These algorithms automatically select discriminant variables from unstructured and potentially voluminous data. They can thus extract logical cause and effect rules (determinism) that did not initially appear in the raw data.
+  
+
+\newpage
+
+The *rpart* and *parkykit* packages in R Environment
+========================================================
+
+**rpart**
+
+* rpart will run a regression tree if the response variable is numeric, and a classification tree if it is a factor. See here [link](https://www.rdocumentation.org/packages/rpart/versions/4.1-13/topics/rpart) for a detailed introduction on tree-based modeling with rpart package.
+
+
+**parkykit**
+
+* A toolkit with infrastructure for representing, summarizing, and visualizing tree-structured regression and classification models. 
+
+  
+R Environment Set Up
+========================================================
+To Begin, **caret**, **rpart**, **randomForest**, **gbm**, **rattle**, **pROC**, **plyr**, **e1071**, **partykit**, **readxl**, **ggplot2**, **gplots**, **psych** and **pander** needs to be installed. 
+
+## Installing All Packages 
+
+```{r }
+
+if(!require(package = "caret")){
+  install.packages(pkgs = "caret")
+}
+if(!require(package = "rpart")){
+  install.packages(pkgs = "rpart")
+}
+if(!require(package = "randomForest")){
+  install.packages(pkgs = "randomForest")
+}
+if(!require(package = "gbm")){
+  install.packages(pkgs = "gbm")
+}
+if(!require(package = "rattle")){
+  install.packages(pkgs = "rattle")
+}
+if(!require(package = "pROC")){
+  install.packages(pkgs = "pROC")
+}
+if(!require(package = "plyr")){
+  install.packages(pkgs = "plyr")
+}
+if(!require(package = "e1071")){
+  install.packages(pkgs = "e1071")
+}
+if(!require(package = "partykit")){
+  install.packages(pkgs = "partykit")
+}
+if(!require(package = "readxl")){
+  install.packages(pkgs = "readxl")
+}
+if(!require(package = "ggplot2")){
+  install.packages(pkgs = "ggplot2")
+}
+if(!require(package = "gplots")){
+  install.packages(pkgs = "gplots")
+}
+if(!require(package = "psych")){
+  install.packages(pkgs = "psych")
+}
+if(!require(package = "pander")){
+  install.packages(pkgs = "pander")
+}
+```
+
+## Loading Packages
+
+First, we need to import the necessary packages:
+
+```{r }
+
+library(caret)
+library(e1071)
+library(partykit)
+library(rpart)
+library(randomForest)
+library(gbm)
+library(rattle)
+library(pROC)
+library(plyr)
+library(readxl)
+library(lattice)
+library(ggplot2)
+library(gplots)
+library(grid)
+library(libcoin)
+library(gplots)
+library(mvtnorm)
+library(psych)
+library(pander)
+```
+
+\newpage
+
+Breast Tissue Data Set
+=======================================================
+The Breat Tissue Data Set is freely available on the UCI Machine Learning Repository Website.
+
+The Dataset can be downloaded here [link](http://archive.ics.uci.edu/ml/datasets/Breast+Tissue)
+
+The Dataset has electrical impedance measurements of freshly excised breast tissue.
+
+The Dataset is a multivariate dataset having 10 attributes (9 numeric types, 1 class type) and 106 instances.
+	
+* Dataset Attribute Information:
+    + **Class**: Different types of breast cancer observed/studied 
+    + **I0**: Impedivity at zero frequency
+    + **PA500**: Phase angle at 500KHz
+    + **HFS**: High frequency slope of phase angle
+    + **DA**: Impedance distance between spectral ends
+    + **Area**: Area under spectrum
+    + **A/DA**: Area normalized by DA
+    + **MAX IP**: Maximum of the spectrum
+    + **DR**: Distance between I0 and the real part of the maximum frequency point
+    + **P**: Length of the spectral curve
+
+## Dataset Purpose
+
+The Dataset can be used for predicting the classification of either the original 6 classes or of 4 classes by merging together the fibro-adenoma, mastopathy and glandular classes.
+
+
+## Describe and Plot the Dataset 
+
+```{r }
+
+BreastData <- read_excel("BreastData.xls")
+attach(BreastData)
+
+data = read_excel("BreastData.xls")
+attach(data)
+ddata <-describe(data)
+
+panderOptions("table.split.table", Inf)  ## don't split tables
+pander(ddata)
+
+pander(head(BreastData))
+str(BreastData)
+pander(summary(BreastData))
+
+Bdata<-cbind(data[,3],data[,4],data[,5],data[,6],data[,7],data[,8],data[,9])
+plot(Bdata,main = "Breast Tissue Data", pch = 21, bg = rainbow(7))
+
+```
+
+\newpage
+
+Decision Tree for data generation.
+========================================================
+
+Now, we need to transform the Class attribute to factor and delete the ID column:
+
+```{r }
+BreastData$Class <- as.factor(BreastData$Class)
+BreastData<-BreastData[,-1]
+```
+
+Let Us now get the probability table for each Class 
+```{r }
+probclass<-prop.table(table(BreastData$Class))
+pander(probclass)
+```
+
+Devide our dataset into training dataset and test dataset 70%-30%:
+
+```{r }
+set.seed(1245)
+data_index <- createDataPartition(BreastData$Class, p=0.7, list = FALSE)
+train_data <- BreastData[data_index,]
+test_data <- BreastData[-data_index,]
+train_data<-data.frame(train_data)
+test_data<-data.frame(test_data)
+```
+
+\newpage
+
+Recursive partitioning for classification, regression and survival trees 
+========================================================
+
+Now, let's build our first model. 
+
+Let's quickly review the possible variables that we could examine. 
+
+We will use variable `Class` as the depondent variable and all others variables as the explanatory variables:
+
+```{r }
+cart_model <- train(Class ~ ., train_data, method="rpart")
+cart_model
+fancyRpartPlot(cart_model$finalModel, sub="")
+```
+
+\newpage
+
+Accuracy of The Models
+========================================================
+
+Now we will build our confusion matrix to calculate the accuracy of our model:
+```{r }
+pred1<- predict(cart_model, test_data)
+confusionMatrix(pred1, test_data$Class)
+```
+The  Accuracy with this model equal to : `0.6207` 
+
+```{r }
+rpartPred<- rpart (Class ~ .,train_data)
+rpartPred
+class.cnt <- rpart.control (minsplit = 1)
+rpartPred<- rpart (Class ~ .,train_data,control=class.cnt)
+
+pred3<-predict(rpartPred, test_data)
+Result<-c(1:nrow(test_data))           
+Result[which(pred3[,1]==1)]<-"adi"
+Result[which(pred3[,2]==1)]<-"car"
+Result[which(pred3[,3]==1)]<-"con"
+Result[which(pred3[,4]==1)]<-"fad"
+Result[which(pred3[,5]==1)]<-"gla"
+Result[which(pred3[,6]==1)]<-"mas"
+Result<-as.factor(Result)
+confusionMatrix(Result, test_data$Class)
+fancyRpartPlot(rpartPred,cex=0.5)
+```
+The Accuracy with this model equal to : `0.6552`
+
+\newpage
+
+Conditional Inference Trees 
+========================================================
+
+```{r }
+ct <- ctree(Class ~ ., data = train_data)
+pred4<-predict(ct, test_data)
+confusionMatrix(pred4, test_data$Class)
+plot(ct)
+
+```
+The  Accuracy with this model equal to : `0.6552`
+
+\newpage
+
+Conclusion
+========================================================
+
+From the result above, we can conclude that the Accuracy Models give us the bigger value of accuracy at `65.52%` equal to ctree so, we can choose the simplest one (ctree function): 
+
+```{r }
+plot(ct)
+```
+
+If we have I0 <= **551.879** and Max IP <= **49.328** 
+
+The Class will be: 
+
+* **mas** with the probability approximately equal to **0.31**,
+* **gla**  with the probability approximately equal to **0.30**,
+* **fad** with the probability approximately equal to **0.29** and 
+* **car** with the probability approximately equal to **0.1**
+
+If we have I0 <= **551.879** and Max IP > **49.328** 
+
+The Class will be: 
+
+* **car** with the probability approximately equal to **1** 
+
+If we have I0 > **551.879** and P <= **1524.609** 
+
+The Class will be:
+
+* **con** with the probability approximately equal to **0.9**,
+* **adi**   with the probability approximately equal to **0.1**
+
+If we have I0 > **551.879** and P >= **1524.609** 
+
+The Class will be: 
+
+* **adi** with the probability approximately equal to **1**
+
+This model give us a good result with **65.5%** 
+
+\newpage
+
+Reference 
+========================================================
+
+**Therneau, T.M., & Atkinson, E.J.** (1980). An Introduction to Recursive Partitioning Using the RPART Routines.
+
+**Loh, Wei-Yin.** (2008). Classification and Regression Tree Methods. 10.1002/9780470061572.eqr492.
+
+**Torsten Hothorn, Achim Zeileis** (2015). partykit: A Modular Toolkit for Recursive Partytioning in R. Journal of Machine Learning Research, 16, 3905-3909. URL http://jmlr.org/papers/v16/hothorn15a.html
+
+**Torsten Hothorn, Kurt Hornik and Achim Zeileis** (2006). Unbiased Recursive Partitioning: A Conditional Inference Framework. Journal of Computational and Graphical Statistics, 15(3), 651--674. 
+
+
